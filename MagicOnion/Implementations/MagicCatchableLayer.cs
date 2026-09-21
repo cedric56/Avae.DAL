@@ -205,20 +205,7 @@ public partial class MagicCatchableLayer(IServiceProvider provider, string url, 
             return [];
         }
     }
-
-    public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null)
-    {
-        try
-        {
-            return await base.QueryAsync(command, map, splitOn, aliases);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex.Message);
-            return [];
-        }
-    }
-
+    
     public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(string sql, Func<TFirst, TSecond, TThird, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null)
     {
         try

@@ -175,11 +175,6 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
         return AsyncHelper.RunSync(() => QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType, aliases));
     }
 
-    public virtual Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new()
-    {
-        return QueryAsync(command.CommandText, map, command.Parameters, command.Transaction, command.Buffered, splitOn, command.CommandTimeout, command.CommandType, aliases);
-    }
-
     public virtual IEnumerable<TReturn> Query<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFirst, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSecond, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TThird, TReturn>(string sql, Func<TFirst, TSecond, TThird, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new()
     {
         if (OperatingSystem.IsBrowser())

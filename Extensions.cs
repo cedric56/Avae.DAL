@@ -37,6 +37,8 @@ public static class Extensions
                 using var connection = provider.GetRequiredService<IDbConnection>();
                 using var cmd = connection.CreateCommand();
                 cmd.CommandText = commandText;
+                if (connection.State != ConnectionState.Open)
+                    connection.Open();
                 cmd.ExecuteNonQuery();
             }
         }
