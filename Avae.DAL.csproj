@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <!--<IsAotCompatible>true</IsAotCompatible>-->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <Version>1.0.0-preview.1</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Dapper.Contrib" />
+    <PackageReference Include="MessagePack" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+
+    <!--
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftVersion)" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Only" Version="18.7.23" />
+    <PackageReference Include="MagicOnion.Serialization.MessagePack" Version="$(MagicOnionVersion)" />
+    <PackageReference Include="MagicOnion.Client" Version="$(MagicOnionVersion)" />
+    <PackageReference Include="Grpc.AspNetCore.Web" Version="$(GrpcVersion)" />
+    <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
+    <PackageReference Include="Grpc.Net.Client.Web" Version="$(GrpcVersion)" />
+    
+    <PackageReference Include="GrpcWebSocketBridge.AspNetCore" Version="$(GrpcBridgeVersion)" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    -->
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Content Include="build\**" PackagePath="buildtransitive\" />
+
+    <Compile Remove="PostgreSQL\**" />
+    <TfmSpecificPackageFile Include="PostgreSQL\**">
+      <PackagePath>lib\$(TargetFramework)\PostgreSQL\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </TfmSpecificPackageFile>
+
+    <Compile Remove="Sqlite\**" />
+    <TfmSpecificPackageFile Include="Sqlite\**">
+      <PackagePath>lib\$(TargetFramework)\Sqlite\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </TfmSpecificPackageFile>
+
+    <Compile Remove="SqlDependency\**" />
+    <TfmSpecificPackageFile Include="SqlDependency\**">
+      <PackagePath>lib\$(TargetFramework)\SqlDependency\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </TfmSpecificPackageFile>
+
+    <Compile Remove="SignalR\**" />
+    <TfmSpecificPackageFile Include="SignalR\**">
+      <PackagePath>lib\$(TargetFramework)\SignalR\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </TfmSpecificPackageFile>
+
+    <Compile Remove="MagicOnion\**" />
+    <TfmSpecificPackageFile Include="MagicOnion\**">
+      <PackagePath>lib\$(TargetFramework)\MagicOnion\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </TfmSpecificPackageFile>
+
+    <Compile Remove="MagicOnionClient\**" />
+    <TfmSpecificPackageFile Include="MagicOnionClient\**">
+      <PackagePath>lib\$(TargetFramework)\MagicOnionClient\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </TfmSpecificPackageFile>
+
+    <Compile Remove="MagicOnionServer\**" />
+    <TfmSpecificPackageFile Include="MagicOnionServer\**">
+      <PackagePath>lib\$(TargetFramework)\MagicOnionServer\%(RecursiveDir)%(Filename)%(Extension)</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </TfmSpecificPackageFile>
+  </ItemGroup>
+
+</Project>

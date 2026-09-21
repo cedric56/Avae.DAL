@@ -1,0 +1,58 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <ItemGroup Condition="$(AvaeFeatures.Contains(';PostgreSQL;'))">
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\lib\net10.0\PostgreSQL\**\*.cs">
+      <Visible>false</Visible>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(AvaeFeatures.Contains(';Sqlite;'))">
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\lib\net10.0\Sqlite\**\*.cs">
+      <Visible>false</Visible>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(AvaeFeatures.Contains(';SqlTableDependency;'))">
+    <PackageReference Include="SqlTableDependencyCore" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\lib\net10.0\SqlDependency\**\*.cs">
+      <Visible>false</Visible>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(AvaeFeatures.Contains(';SignalR;'))">
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\lib\net10.0\SignalR\**\*.cs">
+      <Visible>false</Visible>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(AvaeFeatures.Contains(';MagicOnion;'))">
+    <PackageReference Include="MagicOnion.Abstractions" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\lib\net10.0\MagicOnion\**\*.cs">
+      <Visible>false</Visible>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(AvaeFeatures.Contains(';MagicClient;'))">
+    <PackageReference Include="GrpcWebSocketBridge.Client" />
+    <PackageReference Include="MagicOnion.Client" />
+    <PackageReference Include="Grpc.Net.Client.Web" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\lib\net10.0\MagicOnionClient\**\*.cs">
+      <Visible>false</Visible>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(AvaeFeatures.Contains(';MagicServer;'))">
+    <PackageReference Include="Grpc.AspNetCore.Web" />
+    <PackageReference Include="Grpc.AspNetCore" />
+    <PackageReference Include="MagicOnion.Server" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\lib\net10.0\MagicOnionServer\**\*.cs">
+      <Visible>false</Visible>
+    </Compile>
+  </ItemGroup>
+
+</Project>
