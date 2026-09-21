@@ -1,6 +1,5 @@
 <Solution>
   <Folder Name="/Solution Items/">
-    <File Path="../../../Downloads/README.md" />
     <File Path="Directory.Packages.props" />
   </Folder>
   <Project Path="Avae.DAL.csproj" />
