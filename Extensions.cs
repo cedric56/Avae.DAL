@@ -31,14 +31,18 @@ public static class Extensions
 
         void CreateDB(IServiceProvider provider)
         {
-            using var connection = provider.GetService<IDbConnection>();
-            if (connection is not null)
+            var commandText = getDBCreateCommand?.Invoke();
+            if (!string.IsNullOrWhiteSpace(commandText))
             {
-                connection.Open();
+                using var connection = provider.GetService<IDbConnection>();
+                if (connection is not null)
+                {
+                    connection.Open();
 
-                using var cmd = connection.CreateCommand();
-                cmd.CommandText = getDBCreateCommand?.Invoke();
-                cmd.ExecuteNonQuery();
+                    using var cmd = connection.CreateCommand();
+                    cmd.CommandText = commandText;
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
     }
