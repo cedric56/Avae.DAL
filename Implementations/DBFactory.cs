@@ -12,7 +12,6 @@ public class DBFactory<TDbConnection>(string connectionString) : DbProviderFacto
         {
             ConnectionString = connectionString
         };
-        connection.Open();
         return connection;
     }
 }

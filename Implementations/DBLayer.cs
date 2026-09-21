@@ -57,7 +57,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.GetAsync<T>(id, transaction, commandTimeout).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.GetAsync<T>(id, transaction, commandTimeout).ConfigureAwait(false);
+        return await db.GetAsync<T>(id, transaction: null, commandTimeout).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<T>> FindByAnyAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
@@ -67,7 +67,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.QueryAsync<T>(sql, parameters, transaction, commandTimeout).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.QueryAsync<T>(sql, parameters, transaction, commandTimeout).ConfigureAwait(false);
+        return await db.QueryAsync<T>(sql, parameters, transaction: null, commandTimeout).ConfigureAwait(false);
     }
 
     public IEnumerable<T> FindByAny<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
@@ -77,7 +77,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Query<T>(sql, parameters, transaction, commandTimeout: commandTimeout);
 
         using var db = factory.CreateConnection()!;
-        return db.Query<T>(sql, parameters, transaction, commandTimeout: commandTimeout);
+        return db.Query<T>(sql, parameters, transaction: null, commandTimeout: commandTimeout);
     }
 
     public async Task<IEnumerable<T>> WhereAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
@@ -87,7 +87,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.QueryAsync<T>(sql, parameters, transaction, commandTimeout).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.QueryAsync<T>(sql, parameters, transaction, commandTimeout).ConfigureAwait(false);
+        return await db.QueryAsync<T>(sql, parameters, transaction: null, commandTimeout).ConfigureAwait(false);
     }
 
     public IEnumerable<T> Where<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
@@ -97,7 +97,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Query<T>(sql, parameters, transaction, commandTimeout: commandTimeout);
 
         using var db = factory.CreateConnection()!;
-        return db.Query<T>(sql, parameters, transaction, commandTimeout: commandTimeout);
+        return db.Query<T>(sql, parameters, transaction: null, commandTimeout: commandTimeout);
     }
 
     public int Execute(string sql, object? param = null, IDbTransaction? transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -106,7 +106,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Execute(sql, param, transaction, commandTimeout, commandType);
 
         using var db = factory.CreateConnection()!;
-        return db.Execute(sql, param, transaction, commandTimeout, commandType);
+        return db.Execute(sql, param, transaction: null, commandTimeout, commandType);
     }
 
     public async Task<int> ExecuteAsync(string sql, object? param = null, IDbTransaction? transaction = null, int? commandTimeout = null, CommandType? commandType = null)
@@ -115,7 +115,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.ExecuteAsync(sql, param, transaction, commandTimeout, commandType);
 
         using var db = factory.CreateConnection()!;
-        return await db.ExecuteAsync(sql, param, transaction, commandTimeout, commandType);
+        return await db.ExecuteAsync(sql, param, transaction: null, commandTimeout, commandType);
     }
 
 
@@ -125,7 +125,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 
         using var db = factory.CreateConnection()!;
-        return db.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
+        return db.Query(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType);
     }
 
     public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TReturn> map, string splitOn = "Id")
@@ -140,7 +140,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 
         using var db = factory.CreateConnection()!;
-        return db.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
+        return db.Query(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType);
     }
 
     public IEnumerable<TReturn> Query<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFirst, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSecond, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TThird, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFourth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new()
@@ -149,7 +149,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 
         using var db = factory.CreateConnection()!;
-        return db.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
+        return db.Query(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType);
     }
 
     public IEnumerable<TReturn> Query<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFirst, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSecond, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TThird, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFourth, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFifth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new()
@@ -158,7 +158,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 
         using var db = factory.CreateConnection()!;
-        return db.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
+        return db.Query(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType);
     }
 
     public IEnumerable<TReturn> Query<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFirst, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSecond, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TThird, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFourth, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFifth, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSixth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new()
@@ -167,7 +167,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 
         using var db = factory.CreateConnection()!;
-        return db.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
+        return db.Query(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType);
     }
 
     public IEnumerable<TReturn> Query<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFirst, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSecond, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TThird, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFourth, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFifth, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSixth, [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TSeventh, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new() where TSeventh : new()
@@ -176,7 +176,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return conn.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 
         using var db = factory.CreateConnection()!;
-        return db.Query(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
+        return db.Query(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType);
     }
 
     public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(string sql, Func<TFirst, TSecond, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new()
@@ -185,7 +185,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
+        return await db.QueryAsync(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(string sql, Func<TFirst, TSecond, TThird, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new()
@@ -194,13 +194,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
-    }
-
-    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new()
-    {
-        using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(command, map, splitOn).ConfigureAwait(false);
+        return await db.QueryAsync(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new()
@@ -209,13 +203,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
-    }
-
-    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new()
-    {
-        using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(command, map, splitOn).ConfigureAwait(false);
+        return await db.QueryAsync(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new()
@@ -224,14 +212,8 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
+        return await db.QueryAsync(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
 
-    }
-
-    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new()
-    {
-        using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(command, map, splitOn).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new()
@@ -240,13 +222,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
-    }
-
-    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new()
-    {
-        using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(command, map, splitOn).ConfigureAwait(false);
+        return await db.QueryAsync(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new() where TSeventh : new()
@@ -255,19 +231,7 @@ public class DBLayer(IDBFactory factory) : IDBLayer
             return await conn.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
 
         using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
-    }
-
-    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new() where TSeventh : new()
-    {
-        using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(command, map, splitOn).ConfigureAwait(false);
-    }
-
-    public async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new()
-    {
-        using var db = factory.CreateConnection()!;
-        return await db.QueryAsync(command, map, splitOn).ConfigureAwait(false);
+        return await db.QueryAsync(sql, map, param, transaction: null, buffered, splitOn, commandTimeout, commandType).ConfigureAwait(false);
     }
 
     private static readonly ConcurrentDictionary<Type, string> _columnCache = new();
@@ -343,10 +307,14 @@ public class DBLayer(IDBFactory factory) : IDBLayer
                 throw new ArgumentException($"Invalid filter column '{key}' for {typeof(T).Name}.");
 
             var paramName = $"p{i++}";
-            parameters.Add(paramName, value);
-
-            var column = allowed.First(c => c.Equals(key, StringComparison.OrdinalIgnoreCase));           
-            conditions.Add($"({column} = @{paramName})");
+            var column = allowed.First(c => c.Equals(key, StringComparison.OrdinalIgnoreCase));
+            if (value is null)
+                conditions.Add($"({column} IS NULL)");
+            else
+            {
+                parameters.Add(paramName, value);
+                conditions.Add($"({column} = @{paramName})");
+            }
         }
 
         var where = string.Join(condition, conditions);

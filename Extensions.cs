@@ -34,15 +34,10 @@ public static class Extensions
             var commandText = getDBCreateCommand?.Invoke();
             if (!string.IsNullOrWhiteSpace(commandText))
             {
-                using var connection = provider.GetService<IDbConnection>();
-                if (connection is not null)
-                {
-                    connection.Open();
-
-                    using var cmd = connection.CreateCommand();
-                    cmd.CommandText = commandText;
-                    cmd.ExecuteNonQuery();
-                }
+                using var connection = provider.GetRequiredService<IDbConnection>();
+                using var cmd = connection.CreateCommand();
+                cmd.CommandText = commandText;
+                cmd.ExecuteNonQuery();
             }
         }
     }
