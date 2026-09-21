@@ -37,7 +37,7 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
             .ConfigureAwait(false);
     }
 
-    public virtual IEnumerable<T> FindByAny<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, int? commandTimeout = null) where T : class, new()
+    public virtual IEnumerable<T> FindByAny<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
     {
         if (OperatingSystem.IsBrowser())
         {
@@ -46,10 +46,10 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
             if (result == Array.Empty<byte>()) return [];
             return MessagePackSerializer.Deserialize<IEnumerable<T>>(result) ?? [];
         }
-        return AsyncHelper.RunSync(() => FindByAnyAsync<T>(filters, commandTimeout));
+        return AsyncHelper.RunSync(() => FindByAnyAsync<T>(filters, transaction, commandTimeout));
     }
 
-    public virtual async Task<IEnumerable<T>> FindByAnyAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, int? commandTimeout = null) where T : class, new()
+    public virtual async Task<IEnumerable<T>> FindByAnyAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
     {
         using var tcs = new CancellationTokenSource(globalCommandTimeout);
         var service = provider.GetRequiredService<IMagicOnionLayer>();
@@ -112,7 +112,7 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
         return MessagePackSerializer.Deserialize<T>(result.Data);
     }
 
-    public virtual IEnumerable<T> Where<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, int? commandTimeout = null) where T : class, new()
+    public virtual IEnumerable<T> Where<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
     {
         if (OperatingSystem.IsBrowser())
         {
@@ -121,10 +121,10 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
             if (result == Array.Empty<byte>()) return [];
             return MessagePackSerializer.Deserialize<IEnumerable<T>>(result) ?? [];
         }
-        return AsyncHelper.RunSync(() => WhereAsync<T>(filters, commandTimeout));
+        return AsyncHelper.RunSync(() => WhereAsync<T>(filters, transaction, commandTimeout));
     }
 
-    public virtual async Task<IEnumerable<T>> WhereAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, int? commandTimeout = null) where T : class, new()
+    public virtual async Task<IEnumerable<T>> WhereAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new()
     {
         using var tcs = new CancellationTokenSource(globalCommandTimeout);
         var service = provider.GetRequiredService<IMagicOnionLayer>();
@@ -273,11 +273,6 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
         return rows.Select(row => MapRow(row, map, splitOn, aliases)).ToList();
     }
 
-    public virtual Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new()
-    {
-        return QueryAsync(command.CommandText, map, command.Parameters, command.Transaction, command.Buffered, splitOn, command.CommandTimeout, command.CommandType, aliases);
-    }
-
     public virtual async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new()
     {
         using var tcs = new CancellationTokenSource(globalCommandTimeout);
@@ -290,11 +285,6 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
         if (result.Data == Array.Empty<byte>()) return [];
         var rows = MessagePackSerializer.Deserialize<IEnumerable<IDictionary<string, object>>>(result.Data) ?? [];
         return rows.Select(row => MapRow(row, map, splitOn, aliases)).ToList();
-    }
-
-    public virtual Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new()
-    {
-        return QueryAsync(command.CommandText, map, command.Parameters, command.Transaction, command.Buffered, splitOn, command.CommandTimeout, command.CommandType, aliases);
     }
 
     public virtual async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new()
@@ -311,11 +301,6 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
         return rows.Select(row => MapRow(row, map, splitOn, aliases)).ToList();
     }
 
-    public virtual Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new()
-    {
-        return QueryAsync(command.CommandText, map, command.Parameters, command.Transaction, command.Buffered, splitOn, command.CommandTimeout, command.CommandType, aliases);
-    }
-
     public virtual async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new()
     {
         using var tcs = new CancellationTokenSource(globalCommandTimeout);
@@ -330,11 +315,6 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
         return rows.Select(row => MapRow(row, map, splitOn, aliases)).ToList();
     }
 
-    public virtual Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new()
-    {
-        return QueryAsync(command.CommandText, map, command.Parameters, command.Transaction, command.Buffered, splitOn, command.CommandTimeout, command.CommandType, aliases);
-    }
-
     public virtual async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new() where TSeventh : new()
     {
         using var tcs = new CancellationTokenSource(globalCommandTimeout);
@@ -347,11 +327,6 @@ public partial class MagicOnionLayer(IServiceProvider provider, string url, int 
         if (result.Data == Array.Empty<byte>()) return [];
         var rows = MessagePackSerializer.Deserialize<IEnumerable<IDictionary<string, object>>>(result.Data) ?? [];
         return rows.Select(row => MapRow(row, map, splitOn, aliases)).ToList();
-    }
-
-    public virtual Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null) where TFirst : new() where TSecond : new() where TThird : new() where TFourth : new() where TFifth : new() where TSixth : new() where TSeventh : new()
-    {
-        return QueryAsync(command.CommandText, map, command.Parameters, command.Transaction, command.Buffered, splitOn, command.CommandTimeout, command.CommandType, aliases);
     }
 
     private static List<Dictionary<string, object>> SplitRow(IDictionary<string, object> row, string splitOn, int groupCount, IEnumerable<DBAlias>? aliases)

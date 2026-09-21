@@ -37,11 +37,11 @@ public partial class MagicCatchableLayer(IServiceProvider provider, string url, 
         }
     }
 
-    public override IEnumerable<T> FindByAny<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, int? commandTimeout = null) where T : class
+    public override IEnumerable<T> FindByAny<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class
     {
         try
         {
-            return base.FindByAny<T>(filters, commandTimeout);
+            return base.FindByAny<T>(filters, transaction, commandTimeout);
         }
         catch (Exception ex)
         {
@@ -50,11 +50,11 @@ public partial class MagicCatchableLayer(IServiceProvider provider, string url, 
         }
     }
 
-    public override async Task<IEnumerable<T>> FindByAnyAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, int? commandTimeout = null) where T : class
+    public override async Task<IEnumerable<T>> FindByAnyAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class
     {
         try
         {
-            return await base.FindByAnyAsync<T>(filters, commandTimeout);
+            return await base.FindByAnyAsync<T>(filters, transaction, commandTimeout);
         }
         catch (Exception ex)
         {
@@ -232,37 +232,11 @@ public partial class MagicCatchableLayer(IServiceProvider provider, string url, 
         }
     }
 
-    public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null)
-    {
-        try
-        {
-            return await base.QueryAsync(command, map, splitOn, aliases);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex.Message);
-            return [];
-        }
-    }
-
     public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null)
     {
         try
         {
             return await base.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType, aliases);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex.Message);
-            return [];
-        }
-    }
-
-    public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null)
-    {
-        try
-        {
-            return await base.QueryAsync(command, map, splitOn, aliases);
         }
         catch (Exception ex)
         {
@@ -284,19 +258,6 @@ public partial class MagicCatchableLayer(IServiceProvider provider, string url, 
         }
     }
 
-    public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null)
-    {
-        try
-        {
-            return await base.QueryAsync(command, map, splitOn, aliases);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex.Message);
-            return [];
-        }
-    }
-
     public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null)
     {
         try
@@ -310,37 +271,11 @@ public partial class MagicCatchableLayer(IServiceProvider provider, string url, 
         }
     }
 
-    public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null)
-    {
-        try
-        {
-            return await base.QueryAsync(command, map, splitOn, aliases);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex.Message);
-            return [];
-        }
-    }
-
     public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, object? param = null, IDbTransaction? transaction = null, bool buffered = true, string splitOn = "Id", int? commandTimeout = null, CommandType? commandType = null, IEnumerable<DBAlias>? aliases = null)
     {
         try
         {
             return await base.QueryAsync(sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType, aliases);
-        }
-        catch (Exception ex)
-        {
-            logger?.LogError(ex.Message);
-            return [];
-        }
-    }
-
-    public override async Task<IEnumerable<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn>(CommandDefinition command, Func<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, TSeventh, TReturn> map, string splitOn = "Id", IEnumerable<DBAlias>? aliases = null)
-    {
-        try
-        {
-            return await base.QueryAsync(command, map, splitOn, aliases);
         }
         catch (Exception ex)
         {
@@ -383,11 +318,11 @@ public partial class MagicCatchableLayer(IServiceProvider provider, string url, 
         }
     }
 
-    public override IEnumerable<T> Where<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, int? commandTimeout = null) where T : class
+    public override IEnumerable<T> Where<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class
     {
         try
         {
-            return base.Where<T>(filters, commandTimeout);
+            return base.Where<T>(filters, transaction, commandTimeout);
         }
         catch (Exception ex)
         {
@@ -396,11 +331,11 @@ public partial class MagicCatchableLayer(IServiceProvider provider, string url, 
         }
     }
 
-    public override async Task<IEnumerable<T>> WhereAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, int? commandTimeout = null) where T : class
+    public override async Task<IEnumerable<T>> WhereAsync<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class
     {
         try
         {
-            return await base.WhereAsync<T>(filters, commandTimeout);
+            return await base.WhereAsync<T>(filters, transaction, commandTimeout);
         }
         catch (Exception ex)
         {
