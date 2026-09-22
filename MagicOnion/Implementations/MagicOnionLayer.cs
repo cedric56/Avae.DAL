@@ -107,7 +107,7 @@ public partial class MagicOnionLayer(
     public virtual Task<T?> GetAsync<T>(long id, IDbTransaction? transaction = null, int? commandTimeout = null)
         where T : class, new()
         => InvokeAsync(
-            s => s.GetAsync(typeof(T).Name, id, commandTimeout),
+            async s => await s.GetAsync(typeof(T).Name, id, commandTimeout),
             DeserializeOne<T>,
             default);
 
