@@ -16,7 +16,8 @@ namespace Avae.DAL;
 public partial class MagicOnionLayer(
     IServiceProvider provider,
     string url,
-    int globalCommandTimeout) : IDBLayer
+    int globalCommandTimeout,
+    IDBSessions dBSessions) : IDBLayer
 {
     private IMagicOnionLayer Rpc =>
         provider.GetRequiredService<IMagicOnionLayer>();
@@ -73,13 +74,13 @@ public partial class MagicOnionLayer(
 
     public virtual Task<DBResult> Remove(DBTransactional transactional, int? commandTimeout = null)
     {
-        IDBLayer.Sessions.TryGetValue(transactional.GetType(), out var connectionId);
+        dBSessions.Sessions.TryGetValue(transactional.GetType(), out var connectionId);
         return InvokeRawAsync(async s => await s.Remove(transactional, connectionId ?? "", commandTimeout));
     }
 
     public virtual Task<DBResult> Save(DBTransactional transactional, int? commandTimeout = null)
     {
-        IDBLayer.Sessions.TryGetValue(transactional.GetType(), out var connectionId);
+        dBSessions.Sessions.TryGetValue(transactional.GetType(), out var connectionId);
         return InvokeRawAsync(async s => await s.Save(transactional, connectionId ?? "", commandTimeout));
     }
 
