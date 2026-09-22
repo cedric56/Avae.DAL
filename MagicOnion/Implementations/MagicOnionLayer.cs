@@ -74,13 +74,13 @@ public partial class MagicOnionLayer(
     public virtual Task<DBResult> Remove(DBTransactional transactional, int? commandTimeout = null)
     {
         IDBLayer.Sessions.TryGetValue(transactional.GetType(), out var connectionId);
-        return InvokeRawAsync(s => s.Remove(transactional, connectionId ?? "", commandTimeout));
+        return InvokeRawAsync(async s => await s.Remove(transactional, connectionId ?? "", commandTimeout));
     }
 
     public virtual Task<DBResult> Save(DBTransactional transactional, int? commandTimeout = null)
     {
         IDBLayer.Sessions.TryGetValue(transactional.GetType(), out var connectionId);
-        return InvokeRawAsync(s => s.Save(transactional, connectionId ?? "", commandTimeout));
+        return InvokeRawAsync(async s => await s.Save(transactional, connectionId ?? "", commandTimeout));
     }
 
     private async Task<DBResult> InvokeRawAsync(Func<IMagicOnionLayer, Task<DBResult>> call)
@@ -129,7 +129,7 @@ public partial class MagicOnionLayer(
     public virtual Task<IEnumerable<T>> GetAllAsync<T>(IDbTransaction? transaction = null, int? commandTimeout = null)
         where T : class, new()
         => InvokeAsync(
-            s => s.GetAllAsync(typeof(T).Name, commandTimeout),
+            async s => await s.GetAllAsync(typeof(T).Name, commandTimeout),
             DeserializeMany<T>,
             Enumerable.Empty<T>());
 
@@ -153,7 +153,7 @@ public partial class MagicOnionLayer(
         Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null)
         where T : class, new()
         => InvokeAsync(
-            s => s.WhereAsync(typeof(T).Name, filters, commandTimeout),
+            async s => await s.WhereAsync(typeof(T).Name, filters, commandTimeout),
             DeserializeMany<T>,
             Enumerable.Empty<T>());
 
@@ -177,7 +177,7 @@ public partial class MagicOnionLayer(
         Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null)
         where T : class, new()
         => InvokeAsync(
-            s => s.FindByAnyAsync(typeof(T).Name, filters, commandTimeout),
+            async s => await s.FindByAnyAsync(typeof(T).Name, filters, commandTimeout),
             DeserializeMany<T>,
             Enumerable.Empty<T>());
 
@@ -201,7 +201,7 @@ public partial class MagicOnionLayer(
         string sql, object? param = null, IDbTransaction? transaction = null,
         int? commandTimeout = null, CommandType? commandType = null)
         => InvokeAsync(
-            s => s.ExecuteAsync(sql, param, commandTimeout, commandType ?? CommandType.Text),
+            async s => await s.ExecuteAsync(sql, param, commandTimeout, commandType ?? CommandType.Text),
             DeserializeInt,
             0);
 
@@ -263,7 +263,7 @@ public partial class MagicOnionLayer(
         string sql, object? param, int? commandTimeout, CommandType? commandType,
         Func<IDictionary<string, object>, TReturn> mapRow)
         => InvokeAsync(
-            s => s.QueryAsync(sql, param, commandTimeout, commandType ?? CommandType.Text),
+            async s => await s.QueryAsync(sql, param, commandTimeout, commandType ?? CommandType.Text),
             data => DeserializeRows(data).Select(mapRow).ToList(),
             Enumerable.Empty<TReturn>());
 
