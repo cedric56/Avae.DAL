@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 namespace Avae.DAL;
 
 public partial class MagicCatchableLayer(IMagicOnionLayer layer,
-   string url, int globalCommandTimeout, IDBSessions dBSessions, IXmlHttpRequest? xhr = null, ILogger? logger = null)
-    : MagicOnionLayer(layer, url, globalCommandTimeout, dBSessions, xhr)
+   string url, int globalCommandTimeout, IXmlHttpRequest? xhr = null, ILogger? logger = null)
+    : MagicOnionLayer(layer, url, globalCommandTimeout, xhr)
 {
     public override int Execute(string sql, object? param = null, IDbTransaction? transaction = null, int? commandTimeout = null, CommandType? commandType = null)
     {

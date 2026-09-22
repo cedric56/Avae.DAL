@@ -14,6 +14,8 @@ namespace Avae.DAL;
 
 public class DBLayer(IDBFactory factory) : IDBLayer, IDisposable
 {
+    public Dictionary<Type, string> Sessions { get; } = new();
+
     private TResult UseConnection<TResult>(
         IDbTransaction? transaction,
         Func<IDbConnection, IDbTransaction?, TResult> action)

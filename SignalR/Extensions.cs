@@ -16,7 +16,7 @@ public static class SignalRExtensions
     public static async Task<Func<Task>> AddSignalR<TObject>(
         this IDBMonitor<TObject> monitor,
         string url,        
-        IDBSessions dBSessions,
+        IDBLayer layer,
         IRetryPolicy? retryPolicy = null,
         Func<HttpMessageHandler, HttpMessageHandler>? factory = null,        
         ILogger? logger = null,
@@ -97,7 +97,7 @@ public static class SignalRExtensions
             }
             finally
             {
-                dBSessions.Sessions.Add(typeof(TObject), hub.ConnectionId ?? throw new InvalidOperationException("Connection must be known"));
+                layer.Sessions.Add(typeof(TObject), hub.ConnectionId ?? throw new InvalidOperationException("Connection must be known"));
             }
         }
 

@@ -17,9 +17,10 @@ public partial class MagicOnionLayer(
     IMagicOnionLayer layer,
     string url,
     int globalCommandTimeout,
-    IDBSessions dBSessions, 
     IXmlHttpRequest? xhr = null) : IDBLayer
 {
+    public Dictionary<Type, string> Sessions { get; } = new();
+
     private async Task<T> InvokeAsync<T>(
         Func<IMagicOnionLayer, Task<DBResult>> call,
         Func<byte[], T> deserialize,
@@ -72,13 +73,13 @@ public partial class MagicOnionLayer(
 
     public virtual Task<DBResult> Remove(DBTransactional transactional, int? commandTimeout = null)
     {
-        dBSessions.Sessions.TryGetValue(transactional.GetType(), out var connectionId);
+        Sessions.TryGetValue(transactional.GetType(), out var connectionId);
         return InvokeRawAsync(async s => await s.Remove(transactional, connectionId ?? "", commandTimeout));
     }
 
     public virtual Task<DBResult> Save(DBTransactional transactional, int? commandTimeout = null)
     {
-        dBSessions.Sessions.TryGetValue(transactional.GetType(), out var connectionId);
+        Sessions.TryGetValue(transactional.GetType(), out var connectionId);
         return InvokeRawAsync(async s => await s.Save(transactional, connectionId ?? "", commandTimeout));
     }
 

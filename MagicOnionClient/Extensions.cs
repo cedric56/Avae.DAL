@@ -18,29 +18,29 @@ public static class MagicOnionClientExtensions
     public static Task<Func<Task>> AddStreamingHub<TObject>(
         this IDBMonitor<TObject> monitor,
         string url,
-        IDBSessions dBSessions,
+        IDBLayer layer,
         HttpMessageHandler? httpMessageHandler = null,
         ILogger? logger = null)
         where TObject : class, new()
     {
         IDBFactory.Monitors.Add(monitor);
         var channel = GetGrpcHandlerChannel(url, httpMessageHandler);
-        return monitor.AddStreamingHub(channel, dBSessions, logger);
+        return monitor.AddStreamingHub(channel, layer, logger);
     }
 
     private static async Task<Func<Task>> AddStreamingHub<TObject>(
-        this IDBMonitor<TObject> monitor, GrpcChannel channel, IDBSessions dBSessions, ILogger? logger = null)
+        this IDBMonitor<TObject> monitor, GrpcChannel channel, IDBLayer layer, ILogger? logger = null)
         where TObject : class, new()
     {
         try
         {
-            if (dBSessions.Sessions.TryGetValue(typeof(TObject), out _))
+            if (layer.Sessions.TryGetValue(typeof(TObject), out _))
                 return _disconnect ?? (() => Task.CompletedTask);
 
-            var receiver = new RecordHubReceiver<TObject>(monitor, dBSessions);
+            var receiver = new RecordHubReceiver<TObject>(monitor, layer);
             var hub = await StreamingHubClient.ConnectAsync<IRecordHub<TObject>, IRecordHubReceiver<TObject>>(channel, receiver);//, cancellationToken: cts.Token);
             var guid = await hub.AddReceiverAsync();
-            dBSessions.Sessions.Add(typeof(TObject), guid.ToString());
+            layer.Sessions.Add(typeof(TObject), guid.ToString());
             monitor.OnRecordChanged += OnRecordChanged;
             return _disconnect = async () =>
             {
@@ -59,7 +59,7 @@ public static class MagicOnionClientExtensions
 
             void OnRecordChanged(object? sender, Record<TObject> e)
             {
-                dBSessions.Sessions.TryGetValue(typeof(TObject), out var sessionId);
+                layer.Sessions.TryGetValue(typeof(TObject), out var sessionId);
                 e.Add(sessionId);
                 hub.OnRecordChanged(e);
             }

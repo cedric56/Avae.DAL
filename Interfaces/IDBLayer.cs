@@ -12,6 +12,8 @@ public record DBAlias(string alias, string columnName);
 
 public interface IDBLayer
 {
+    Dictionary<Type, string> Sessions { get; }
+
     T? Get<T>(long id, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new();
 
     Task<T?> GetAsync<T>(long id, IDbTransaction? transaction = null, int? commandTimeout = null) where T : class, new();
