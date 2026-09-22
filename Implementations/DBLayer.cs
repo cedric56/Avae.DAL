@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Avae.DAL;
 
-public class DBLayer(IDBFactory factory) : IDBLayer
+public class DBLayer(IDBFactory factory) : IDBLayer, IDisposable
 {
     private TResult UseConnection<TResult>(
         IDbTransaction? transaction,
@@ -42,10 +42,6 @@ public class DBLayer(IDBFactory factory) : IDBLayer
     public Task<DBResult> Save(DBTransactional transactional, int? commandTimeout = null)
         => transactional.Save(this, factory, commandTimeout);
 
-    // ---------------------------------------------------------------
-    // Get / GetAll (Dapper.Contrib)
-    // ---------------------------------------------------------------
-
     public T? Get<T>(long id, IDbTransaction? transaction = null, int? commandTimeout = null)
         where T : class, new()
         => UseConnection(transaction, (conn, tx) => conn.Get<T>(id, tx, commandTimeout));
@@ -61,10 +57,6 @@ public class DBLayer(IDBFactory factory) : IDBLayer
     public Task<IEnumerable<T>> GetAllAsync<T>(IDbTransaction? transaction = null, int? commandTimeout = null)
         where T : class, new()
         => UseConnectionAsync(transaction, (conn, tx) => conn.GetAllAsync<T>(tx, commandTimeout));
-
-    // ---------------------------------------------------------------
-    // Filtered queries (Where = AND, FindByAny = OR)
-    // ---------------------------------------------------------------
 
     public IEnumerable<T> Where<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] T>(
         Dictionary<string, object> filters, IDbTransaction? transaction = null, int? commandTimeout = null)
@@ -102,10 +94,6 @@ public class DBLayer(IDBFactory factory) : IDBLayer
         return UseConnectionAsync(transaction, (conn, tx) => conn.QueryAsync<T>(sql, parameters, tx, commandTimeout));
     }
 
-    // ---------------------------------------------------------------
-    // Raw SQL
-    // ---------------------------------------------------------------
-
     public int Execute(string sql, object? param = null, IDbTransaction? transaction = null,
         int? commandTimeout = null, CommandType? commandType = null)
         => UseConnection(transaction, (conn, tx) => conn.Execute(sql, param, tx, commandTimeout, commandType));
@@ -113,24 +101,6 @@ public class DBLayer(IDBFactory factory) : IDBLayer
     public Task<int> ExecuteAsync(string sql, object? param = null, IDbTransaction? transaction = null,
         int? commandTimeout = null, CommandType? commandType = null)
         => UseConnectionAsync(transaction, (conn, tx) => conn.ExecuteAsync(sql, param, tx, commandTimeout, commandType));
-
-    // ---------------------------------------------------------------
-    // Multi-map queries
-    //
-    // NOTE: these still need one overload per arity (TFirst..TSeventh)
-    // because Dapper's Query<>/QueryAsync<> multi-map extensions are
-    // themselves distinct overloads per arity — there's no single
-    // signature to delegate to. What's factored out is everything
-    // *around* the call (connection resolution, sync vs. async).
-    //
-    // NOTE 2: `buffered` defaults to true (Dapper materializes the
-    // result before returning), which matters here: UseConnection
-    // disposes the connection as soon as the delegate returns. If a
-    // caller passes buffered: false, the connection will already be
-    // closed by the time the deferred IEnumerable is iterated. This
-    // was already true of the original code — flagging it here since
-    // it's easy to trip over.
-    // ---------------------------------------------------------------
 
     public IEnumerable<TReturn> Query<
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TFirst,
@@ -276,14 +246,6 @@ public class DBLayer(IDBFactory factory) : IDBLayer
         return await action(db).ConfigureAwait(false);
     }
 
-    // ---------------------------------------------------------------
-    // SQL generation — filters are validated against the entity's
-    // own mapped properties (no interpolation of caller-supplied
-    // column names) and table names are restricted to
-    // letters/digits/underscore, so neither the filter keys nor the
-    // table name become a SQL-injection vector.
-    // ---------------------------------------------------------------
-
     private static readonly ConcurrentDictionary<Type, string> _columnCache = new();
 
     private static List<PropertyInfo> GetMappedProperties<
@@ -349,5 +311,10 @@ public class DBLayer(IDBFactory factory) : IDBLayer
         return string.IsNullOrEmpty(where)
             ? $"SELECT {GetColumns<T>()} FROM {GetTableName<T>()}"
             : $"SELECT {GetColumns<T>()} FROM {GetTableName<T>()} WHERE {where}";
+    }
+
+    public void Dispose()
+    {
+        _columnCache.Clear();
     }
 }
