@@ -1,39 +1,29 @@
 <Project>
-
   <PropertyGroup>
-    <MicrosoftVersion>10.0.11</MicrosoftVersion>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <MagicOnionVersion>7.10.2</MagicOnionVersion>
     <GrpcVersion>2.83.0</GrpcVersion>
     <GrpcBridgeVersion>1.4.1</GrpcBridgeVersion>
+    <MicrosoftVersion>10.0.11</MicrosoftVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftVersion)" />
-    <PackageVersion Include="Dapper.Contrib" Version="2.0.78" />
-    <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0-preview.6.26359.118" />
-    <PackageVersion Include="SqlTableDependencyCore" Version="1.0.0" />
-    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Core" Version="1.2.12" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="$(MicrosoftVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="$(MicrosoftVersion)" />
-    <PackageVersion Include="MagicOnion.Abstractions" Version="$(MagicOnionVersion)" />
-    <PackageVersion Include="MagicOnion.Server" Version="$(MagicOnionVersion)" />
-    <PackageVersion Include="MagicOnion.Client" Version="$(MagicOnionVersion)" />
-    <PackageVersion Include="GrpcWebSocketBridge.Client" Version="$(GrpcBridgeVersion)" />
     <PackageVersion Include="MessagePack" Version="3.1.8" />
+    <PackageVersion Include="MagicOnion.Serialization.MessagePack" Version="$(MagicOnionVersion)" />
+    <PackageVersion Include="MagicOnion.Abstractions" Version="$(MagicOnionVersion)" />
+    <PackageVersion Include="MagicOnion.Client" Version="$(MagicOnionVersion)" />
+    <PackageVersion Include="MagicOnion.Server" Version="$(MagicOnionVersion)" />
+    <PackageVersion Include="Grpc.AspNetCore.Web" Version="$(GrpcVersion)" />
+    <PackageVersion Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
+    <PackageVersion Include="Grpc.Net.Client.Web" Version="$(GrpcVersion)" />
+    <PackageVersion Include="GrpcWebSocketBridge.Client" Version="$(GrpcBridgeVersion)" />
+    <PackageVersion Include="GrpcWebSocketBridge.AspNetCore" Version="$(GrpcBridgeVersion)" />
+    <PackageVersion Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    <PackageVersion Include="SqlTableDependencyCore" Version="1.0.0" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0-preview.6.26359.118" />
+    <PackageVersion Include="Dapper.Contrib" Version="2.0.78" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftVersion)" />
-
-    <!--
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftVersion)" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading.Only" Version="18.7.23" />
-    <PackageReference Include="MessagePack" Version="3.1.8" />
-    <PackageReference Include="MagicOnion.Serialization.MessagePack" Version="$(MagicOnionVersion)" />
-    <PackageReference Include="MagicOnion.Client" Version="$(MagicOnionVersion)" />
-    <PackageReference Include="Grpc.AspNetCore.Web" Version="$(GrpcVersion)" />
-    <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
-    <PackageReference Include="Grpc.Net.Client.Web" Version="$(GrpcVersion)" />
-    
-    <PackageReference Include="GrpcWebSocketBridge.AspNetCore" Version="$(GrpcBridgeVersion)" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
-    -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(MicrosoftVersion)" />
   </ItemGroup>
 </Project>
