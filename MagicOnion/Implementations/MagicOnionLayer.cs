@@ -14,24 +14,19 @@ using System.Threading.Tasks;
 namespace Avae.DAL;
 
 public partial class MagicOnionLayer(
-    IServiceProvider provider,
+    IMagicOnionLayer layer,
     string url,
     int globalCommandTimeout,
-    IDBSessions dBSessions) : IDBLayer
+    IDBSessions dBSessions, 
+    IXmlHttpRequest? xhr = null) : IDBLayer
 {
-    private IMagicOnionLayer Rpc =>
-        provider.GetRequiredService<IMagicOnionLayer>();
-
-    private IXmlHttpRequest Xhr =>
-        provider.GetRequiredService<IXmlHttpRequest>();
-
     private async Task<T> InvokeAsync<T>(
         Func<IMagicOnionLayer, Task<DBResult>> call,
         Func<byte[], T> deserialize,
         T empty)
     {
         using var cts = new CancellationTokenSource(globalCommandTimeout);
-        var result = await call(Rpc.WithCancellationToken(cts.Token))
+        var result = await call(layer.WithCancellationToken(cts.Token))
             .ConfigureAwait(false);
 
         if (!result.Successful)
@@ -45,7 +40,10 @@ public partial class MagicOnionLayer(
 
     private T BrowserSend<T>(string method, object[] args, Func<byte[], T> deserialize, T empty)
     {
-        var bytes = Xhr.Send(
+        if (xhr == null)
+            return empty;
+
+        var bytes = xhr.Send(
             url,
             method,
             MessagePackSerializer.Serialize(args),
@@ -87,7 +85,7 @@ public partial class MagicOnionLayer(
     private async Task<DBResult> InvokeRawAsync(Func<IMagicOnionLayer, Task<DBResult>> call)
     {
         using var cts = new CancellationTokenSource(globalCommandTimeout);
-        return await call(Rpc.WithCancellationToken(cts.Token)).ConfigureAwait(false);
+        return await call(layer.WithCancellationToken(cts.Token)).ConfigureAwait(false);
     }
 
     public virtual T? Get<T>(long id, IDbTransaction? transaction = null, int? commandTimeout = null)
