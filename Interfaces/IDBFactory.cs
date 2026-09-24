@@ -1,11 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data.Common;
 
 namespace Avae.DAL;
 
 public interface IDBFactory
 {
-    public static List<IDBMonitor> Monitors { get; } = [];
+    List<IDBMonitor> Monitors { get; }
+
+    Dictionary<Type, string> Sessions { get; }
+
 
     DbConnection? CreateConnection();
 }

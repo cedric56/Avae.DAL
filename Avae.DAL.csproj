@@ -13,16 +13,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dommel" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Dapper.Contrib" />
     <PackageReference Include="MessagePack" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+    <PackageReference Include="MagicOnion.Server"  />
+    <PackageReference Include="MagicOnion.Abstractions" />
 
+    <PackageReference Include="MagicOnion.Client"  />
     <!--
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftVersion)" />
     <PackageReference Include="Microsoft.VisualStudio.Threading.Only" Version="18.7.23" />
     <PackageReference Include="MagicOnion.Serialization.MessagePack" Version="$(MagicOnionVersion)" />
-    <PackageReference Include="MagicOnion.Client" Version="$(MagicOnionVersion)" />
+
     <PackageReference Include="Grpc.AspNetCore.Web" Version="$(GrpcVersion)" />
     <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
     <PackageReference Include="Grpc.Net.Client.Web" Version="$(GrpcVersion)" />

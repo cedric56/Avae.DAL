@@ -1,11 +1,11 @@
 ﻿namespace Avae.DAL;
 
-public partial class RecordHubReceiver<TObject>(IDBMonitor<TObject> monitor, IDBLayer layer) : 
+public partial class RecordHubReceiver<TObject>(IDBMonitor<TObject> monitor, IDBFactory factory) : 
     IRecordHubReceiver<TObject> where TObject : class, new()
 {
     public void OnChanged(Record<TObject> record)
     {
-        layer.Sessions.TryGetValue(typeof(TObject), out var sessionId);
+        factory.Sessions.TryGetValue(typeof(TObject), out var sessionId);
 
         if (record.Contains(sessionId))
             return;

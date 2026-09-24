@@ -45,11 +45,11 @@ public class RecordHubRepository<TObject> : IDisposable where TObject : class, n
     /// </summary>
     /// <param name="monitor">The data source monitor to subscribe to for change notifications.</param>
     /// <param name="logger">Optional logger for registration and notification activity.</param>
-    public RecordHubRepository(IDBMonitor<TObject> monitor, ILogger? logger = null)
+    public RecordHubRepository(IDBMonitor<TObject> monitor, IDBFactory factory, ILogger? logger = null)
     {
         this.logger = logger;
         this.monitor = monitor;
-        IDBFactory.Monitors.Add(monitor);
+        factory.Monitors.Add(monitor);
         monitor.OnRecordChanged += OnRecordChanged;
     }
 

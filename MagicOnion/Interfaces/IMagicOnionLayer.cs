@@ -6,9 +6,9 @@ namespace Avae.DAL;
 
 public interface IMagicOnionLayer : IService<IMagicOnionLayer>
 {
-    UnaryResult<DBResult> Remove(DBTransactional transactional, string connectionId, int? commandTimeout = null);
+    UnaryResult<DBResult> Remove(string type, byte[] bytes, string connectionId, int? commandTimeout = null);
 
-    UnaryResult<DBResult> Save(DBTransactional transactional, string connectionId, int? commandTimeout = null);
+    UnaryResult<DBResult> Save(string type, byte[] bytes, string connectionId, int? commandTimeout = null);
 
     UnaryResult<DBResult> FindByAnyAsync(string type, Dictionary<string, object> filters, int? commandTimeout = null);
 

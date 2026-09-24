@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Dapper.Contrib;
 using MagicOnion;
 using MagicOnion.Server;
 using MessagePack;
@@ -15,7 +16,7 @@ namespace Avae.DAL;
 /// Base MagicOnion service exposing generic entity CRUD/query operations, transactional save/remove,
 /// and raw SQL query/execute operations over the configured data access layer.
 /// </summary>
-public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : ServiceBase<IMagicOnionLayer>, IMagicOnionLayer
+public abstract class MagicOnionService(IDBFactory factory) : ServiceBase<IMagicOnionLayer>, IMagicOnionLayer
 {
     /// <summary>
     /// Resolves the <see cref="EntityHandler"/> registered for <paramref name="type"/> and invokes
@@ -30,7 +31,7 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     /// A <see cref="DBResult"/> indicating success with the serialized data, or failure with an error
     /// message if <paramref name="type"/> is missing/unrecognized or the operation throws.
     /// </returns>
-    private async UnaryResult<DBResult> Request(string type, Func<EntityHandler, DBTransactionalSerializerOptions?, Task<byte[]>> serialize)
+    private async UnaryResult<DBResult> Request(string type, Func<EntityHandler, Task<byte[]>> serialize)
     {
         if (string.IsNullOrWhiteSpace(type))
         {
@@ -55,8 +56,43 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
                 return new DBResult()
                 {
                     Successful = true,
-                    Data = await serialize(handler, GetOptions(type))
+                    Data = await serialize(handler)
                 };
+            }
+            catch (Exception ex)
+            {
+                return new DBResult()
+                {
+                    Successful = false,
+                    Exception = ex.Message
+                };
+            }
+        }
+    }
+
+    private async UnaryResult<DBResult> GetResultAsync(string type, Func<EntityHandler, Task<DBResult>> serialize)
+    {
+        if (string.IsNullOrWhiteSpace(type))
+        {
+            return new DBResult()
+            {
+                Successful = false,
+                Exception = "Type parameter is required"
+            };
+        }
+        else if (!EntityHandler.Handlers.TryGetValue(type, out var handler))
+        {
+            return new DBResult()
+            {
+                Successful = false,
+                Exception = "Unable to find entity handler"
+            };
+        }
+        else
+        {
+            try
+            {
+                return await serialize(handler);
             }
             catch (Exception ex)
             {
@@ -78,7 +114,7 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     /// <returns>A <see cref="DBResult"/> containing the serialized matching entities, or failure details.</returns>
     public UnaryResult<DBResult> FindByAnyAsync(string type, Dictionary<string, object> filters, int? commandTimeout = null)
     {
-        return Request(type, async (entity, options) => MessagePackSerializer.Serialize(entity.Enumerable, await entity.FindByAnyAsync(filters, commandTimeout), options));
+        return Request(type, async (entity) => MessagePackSerializer.Serialize(entity.Enumerable, await entity.FindByAnyAsync(filters, commandTimeout)));
     }
 
     /// <summary>
@@ -89,7 +125,7 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     /// <returns>A <see cref="DBResult"/> containing the serialized entities, or failure details.</returns>
     public UnaryResult<DBResult> GetAllAsync(string type, int? commandTimeout = null)
     {
-        return Request(type, async (entity, options) => MessagePackSerializer.Serialize(entity.Enumerable, await entity.GetAllAsync(commandTimeout), options));
+        return Request(type, async (entity) => MessagePackSerializer.Serialize(entity.Enumerable, await entity.GetAllAsync(commandTimeout)));
     }
 
     /// <summary>
@@ -101,7 +137,7 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     /// <returns>A <see cref="DBResult"/> containing the serialized entity, or failure details.</returns>
     public UnaryResult<DBResult> GetAsync(string type, long id, int? commandTimeout = null)
     {
-        return Request(type, async (entity, options) => MessagePackSerializer.Serialize(entity.Type, await entity.GetAsync(id, commandTimeout), options));
+        return Request(type, async (entity) => MessagePackSerializer.Serialize(entity.Type, await entity.GetAsync(id, commandTimeout)));
     }
 
     /// <summary>
@@ -113,18 +149,7 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     /// <returns>A <see cref="DBResult"/> containing the serialized matching entities, or failure details.</returns>
     public UnaryResult<DBResult> WhereAsync(string type, Dictionary<string, object> filters, int? commandTimeout = null)
     {
-        return Request(type, async (entity, options) => MessagePackSerializer.Serialize(entity.Enumerable, await entity.WhereAsync(filters, commandTimeout), options));
-    }
-
-    /// <summary>
-    /// When overridden, supplies the MessagePack serializer options to use when serializing results
-    /// for the specified entity type. The base implementation returns <see langword="null"/> (default options).
-    /// </summary>
-    /// <param name="type">The registered entity type name being serialized.</param>
-    /// <returns>The serializer options to use, or <see langword="null"/> to use the default.</returns>
-    protected virtual DBTransactionalSerializerOptions? GetOptions(string type)
-    {
-        return null;
+        return Request(type, async (entity) => MessagePackSerializer.Serialize(entity.Enumerable, await entity.WhereAsync(filters, commandTimeout)));
     }
 
     /// <summary>
@@ -135,12 +160,12 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     /// <param name="connectionId">The connection identifier to scope the operation to for the duration of the call.</param>
     /// <param name="commandTimeout">Optional command timeout, in seconds.</param>
     /// <returns>A <see cref="DBResult"/> indicating the outcome of the removal.</returns>
-    public async UnaryResult<DBResult> Remove(DBTransactional transactional, string connectionId, int? commandTimeout = null)
+    public async UnaryResult<DBResult> Remove(string type, byte[] bytes, string connectionId, int? commandTimeout = null)
     {
         DBContext.CurrentConnectionId.Value = connectionId;
         try
         {
-            return await transactional.Remove(layer, factory, commandTimeout);
+            return await GetResultAsync(type, async (entity) => await entity.RemoveAsync(bytes));
         }
         finally
         {
@@ -156,12 +181,12 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     /// <param name="connectionId">The connection identifier to scope the operation to for the duration of the call.</param>
     /// <param name="commandTimeout">Optional command timeout, in seconds.</param>
     /// <returns>A <see cref="DBResult"/> indicating the outcome of the save.</returns>
-    public async UnaryResult<DBResult> Save(DBTransactional transactional, string connectionId, int? commandTimeout = null)
+    public async UnaryResult<DBResult> Save(string type, byte[] bytes, string connectionId, int? commandTimeout = null)
     {
         DBContext.CurrentConnectionId.Value = connectionId;
         try
         {
-            return await transactional.Save(layer, factory, commandTimeout);
+            return await GetResultAsync(type, async (entity) => await entity.SaveAsync(bytes));
         }
         finally
         {
@@ -181,7 +206,7 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     {
         try
         {
-            using var db = factory.CreateConnection();
+            using var db = factory.CreateConnection()!;
             var results = await db.QueryAsync(sql, GetParam(param), commandTimeout: commandTimeout, commandType: commandType);
             return new DBResult()
             {
@@ -211,7 +236,7 @@ public abstract class MagicOnionService(IDBLayer layer, IDBFactory factory) : Se
     {
         try
         {
-            using var db = factory.CreateConnection();
+            using var db = factory.CreateConnection()!;
             var results = await db.ExecuteAsync(sql, GetParam(param), commandTimeout: commandTimeout, commandType: commandType);
             return new DBResult()
             {

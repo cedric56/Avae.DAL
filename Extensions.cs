@@ -17,33 +17,6 @@ public static class Extensions
         services.AddTransient<IDbConnection>(_ => factory.CreateConnection()!);
     }
 
-    public static void UseLayer(this IServiceCollection services,
-        Func<IServiceProvider, IDBLayer> getLayer,
-        Func<string>? getDBCreateCommand = null)
-    {
-        services.AddSingleton<IDBLayer>(sp =>
-        {
-            if (getDBCreateCommand != null)
-                CreateDB(sp);
-
-            return getLayer(sp);
-        });
-
-        void CreateDB(IServiceProvider provider)
-        {
-            var commandText = getDBCreateCommand?.Invoke();
-            if (!string.IsNullOrWhiteSpace(commandText))
-            {
-                using var connection = provider.GetRequiredService<IDbConnection>();
-                using var cmd = connection.CreateCommand();
-                cmd.CommandText = commandText;
-                if (connection.State != ConnectionState.Open)
-                    connection.Open();
-                cmd.ExecuteNonQuery();
-            }
-        }
-    }
-
     internal static string ReplaceWholeWord(this string s, string word, string bywhat)
     {
         char firstLetter = word[0];

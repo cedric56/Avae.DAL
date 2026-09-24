@@ -19,12 +19,13 @@ public class ConnectionTracker<TObject> : IDisposable where TObject : class, new
     public ConnectionTracker(
         IHubContext<SignalRHub<TObject>> hubContext,
         IDBMonitor<TObject> monitor,
+        IDBFactory factory,
         ILogger? logger = null)
     {
         this.logger = logger;
         this.monitor = monitor;
         this.hubContext = hubContext;
-        IDBFactory.Monitors.Add(monitor);
+        factory.Monitors.Add(monitor);
         monitor.OnRecordChanged += OnRecordChanged; // subscribed exactly ONCE, ever
     }
 

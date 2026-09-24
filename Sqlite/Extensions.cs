@@ -16,7 +16,9 @@ public static class SqliteExtensions
     {
         public string Parse(string commandText)
         {
-            return commandText.Replace("SCOPE_IDENTITY", "last_insert_rowid");
+            return commandText
+                        .Replace("SCOPE_IDENTITY", "last_insert_rowid", StringComparison.InvariantCultureIgnoreCase)
+                        .Replace("set nocount on ", string.Empty, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 
@@ -81,7 +83,7 @@ public static class SqliteExtensions
 
             void RaiseMonitors()
             {
-                foreach (var monitor in IDBFactory.Monitors.OfType<DBMonitor>())
+                foreach (var monitor in Monitors.OfType<DBMonitor>())
                     foreach (var record in records.DistinctBy(r => r.rowid))
                     {
                         monitor.OnChanged(record.type, record.database, record.table, record.rowid, DBContext.CurrentConnectionId.Value);

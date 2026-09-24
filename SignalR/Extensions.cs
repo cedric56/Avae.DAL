@@ -16,14 +16,14 @@ public static class SignalRExtensions
     public static async Task<Func<Task>> AddSignalR<TObject>(
         this IDBMonitor<TObject> monitor,
         string url,        
-        IDBLayer layer,
+        IDBFactory dbFactory,
         IRetryPolicy? retryPolicy = null,
         Func<HttpMessageHandler, HttpMessageHandler>? factory = null,        
         ILogger? logger = null,
         SignalRHub<TObject>? signalRHub = null)
         where TObject : class, new()
     {
-        IDBFactory.Monitors.Add(monitor);
+        dbFactory.Monitors.Add(monitor);
 
         var hub = new HubConnectionBuilder()
             .AddMessagePackProtocol()
@@ -97,7 +97,7 @@ public static class SignalRExtensions
             }
             finally
             {
-                layer.Sessions.Add(typeof(TObject), hub.ConnectionId ?? throw new InvalidOperationException("Connection must be known"));
+                dbFactory.Sessions.Add(typeof(TObject), hub.ConnectionId ?? throw new InvalidOperationException("Connection must be known"));
             }
         }
 
