@@ -12,15 +12,15 @@ namespace Avae.DAL;
 
 public static class SqliteExtensions
 {
-    class SqliteIdentity : IDBIdentity
-    {
-        public string Parse(string commandText)
-        {
-            return commandText
-                        .Replace("SCOPE_IDENTITY", "last_insert_rowid", StringComparison.InvariantCultureIgnoreCase)
-                        .Replace("set nocount on ", string.Empty, StringComparison.InvariantCultureIgnoreCase);
-        }
-    }
+    //class SqliteIdentity : IDBIdentity
+    //{
+    //    public string Parse(string commandText)
+    //    {
+    //        return commandText
+    //                    .Replace("SCOPE_IDENTITY", "last_insert_rowid", StringComparison.InvariantCultureIgnoreCase)
+    //                    .Replace("set nocount on ", string.Empty, StringComparison.InvariantCultureIgnoreCase);
+    //    }
+    //}
 
     public class SqliteFactory : DBFactory<SqliteConnection>
     {
@@ -97,7 +97,7 @@ public static class SqliteExtensions
     public static void UseSqliteFactory(this IServiceCollection services,
        string connectionString, bool isTransaction = true)
     {
-        services.AddSingleton<IDBIdentity, SqliteIdentity>();
+        //services.AddSingleton<IDBIdentity, SqliteIdentity>();
         services.AddSingleton<IDBFactory>(sp => new SqliteFactory(sp, connectionString, isTransaction));
         services.AddTransient<IDbConnection>(sp => sp.GetRequiredService<IDBFactory>().CreateConnection()!);
     }

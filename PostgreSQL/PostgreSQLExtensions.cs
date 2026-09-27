@@ -8,17 +8,17 @@ namespace Avae.DAL;
 
 public static class PostgreSQLExtensions
 {
-    [UnsafeAccessor(UnsafeAccessorKind.StaticField, Name = "DefaultAdapter")]
-    public static extern ref ISqlAdapter GetDefaultAdapter(
-     [UnsafeAccessorType("Dapper.Contrib.Extensions.SqlMapperExtensions, Dapper.Contrib")] object? facade);
+    //[UnsafeAccessor(UnsafeAccessorKind.StaticField, Name = "DefaultAdapter")]
+    //public static extern ref ISqlAdapter GetDefaultAdapter(
+    // [UnsafeAccessorType("Dapper.Contrib.Extensions.SqlMapperExtensions, Dapper.Contrib")] object? facade);
 
-    class PostgreIdentity : IDBIdentity
-    {
-        public string Parse(string commandText)
-        {
-            return commandText.Replace("SCOPE_IDENTITY", "id");
-        }
-    }
+    //class PostgreIdentity : IDBIdentity
+    //{
+    //    public string Parse(string commandText)
+    //    {
+    //        return commandText.Replace("SCOPE_IDENTITY", "id");
+    //    }
+    //}
 
     public class SqlPostgreFactory : DBFactory<NpgsqlConnection>
     {
@@ -43,10 +43,10 @@ public static class PostgreSQLExtensions
     public static void UseNpgsqlFactory(this IServiceCollection services,
        string connectionString)
     {
-        GetDefaultAdapter(null) = new PostgresLowercaseAdapter();
+        //GetDefaultAdapter(null) = new PostgresLowercaseAdapter();
 
         var factory = new SqlPostgreFactory(connectionString);
-        services.AddSingleton<IDBIdentity, PostgreIdentity>();
+        //services.AddSingleton<IDBIdentity, PostgreIdentity>();
         services.AddSingleton<IDBFactory>(sp => factory);
         services.AddTransient<IDbConnection>(_ => factory.CreateConnection()!);
     }

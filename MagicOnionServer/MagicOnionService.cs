@@ -1,5 +1,4 @@
 ﻿using Dapper;
-using Dapper.Contrib;
 using MagicOnion;
 using MagicOnion.Server;
 using MessagePack;
