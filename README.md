@@ -1,139 +1,137 @@
 # Avae.DAL
 
-Lightweight data-access layer for .NET, built around **Dapper** / **Dapper.Contrib**, with optional backends selected via MSBuild feature flags.
-> **Status:** preview (`1.0.0-preview.1`). APIs may change.
+Lightweight .NET data-access building blocks around **Dommel/Dapper**, with optional database and transport feature modules.
 
----
+> **Status:** preview (1.0.0-preview.1). APIs may change.
 
-## What it provides
+## Current core API
+
+The repository currently contains these core building blocks:
 
 | Area | Description |
-|------|-------------|
-| **IDBLayer** | CRUD helpers (`Get`, `GetAll`, `Where`, `FindByAny`, `Execute`, multi-map `Query`) |
-| **IDBFactory** | Connection factory abstraction |
-| **DBTransactional** | Save / remove unit-of-work style operations |
-| **DBBase** | Optional static accessor after `Initialize` |
-| **Feature modules** | Sqlite, PostgreSQL, SqlTableDependency, SignalR, MagicOnion (client/server) |
+|---|---|
+| IDBFactory / DBFactory<T> | Creates database connections and stores monitor/session registrations |
+| IEntityMapper | Dommel-backed entity selection and paging helpers |
+| DommelEntityMapper | Default IEntityMapper implementation |
+| IDbTransaction<T> | Contract for async save/remove operations |
+| EntityValidator | DataAnnotations validation helpers |
+| Feature modules | SQLite, PostgreSQL, SQL table dependency, SignalR, and MagicOnion |
 
-Core package depends on: `Dapper.Contrib`, `MessagePack`, `Microsoft.Extensions.DependencyInjection.Abstractions`, logging abstractions.
+The repository does **not** currently contain the older IDBLayer / DBLayer / DBBase / DBTransactional API referenced by older documentation.
 
----
+## Target framework
+
+The core project targets **.NET 10**.
 
 ## Install
 
-```xml
-<PackageReference Include="Avae.DAL" Version="1.0.0-preview.1" />
+    <PackageReference Include="Avae.DAL" Version="1.0.0-preview.1" />
 
-<PropertyGroup>
-  <!-- opt into only what you need -->
-  <AvaeFeatures>;Sqlite;</AvaeFeatures>
-  <!-- examples: ;PostgreSQL; ;SignalR; ;MagicClient; ;MagicServer; ;SqlTableDependency; -->
-</PropertyGroup>
-```
+Optional features are enabled through the AvaeFeatures MSBuild property:
 
-Features are activated by `build/Avae.DAL.targets` (package path `buildtransitive`): matching sources under `lib/net10.0/<Feature>/` are compiled into the consuming project and the related NuGet dependencies are added.
+    <PropertyGroup>
+      <AvaeFeatures>;Sqlite;SignalR;</AvaeFeatures>
+    </PropertyGroup>
+
+Available feature flags:
 
 | Feature flag | Adds |
-|--------------|------|
-| `Sqlite` | `Microsoft.Data.Sqlite` + Sqlite helpers |
-| `PostgreSQL` | Npgsql EF Core package + Postgres helpers |
-| `SqlTableDependency` | SqlTableDependencyCore |
-| `SignalR` | SignalR client/core + MessagePack protocol |
-| `MagicOnion` | MagicOnion.Abstractions |
-| `MagicClient` | MagicOnion.Client, gRPC Web / WebSocket bridge |
-| `MagicServer` | MagicOnion.Server, Grpc.AspNetCore |
+|---|---|
+| Sqlite | SQLite helpers and Microsoft.Data.Sqlite |
+| PostgreSQL | PostgreSQL helpers and Npgsql |
+| SqlTableDependency | SQL Server table-dependency support |
+| SignalR | SignalR change notifications |
+| MagicOnion | MagicOnion abstractions |
+| MagicClient | MagicOnion client / gRPC Web / WebSocket bridge |
+| MagicServer | MagicOnion server / ASP.NET Core gRPC |
 
-Target framework: **net10.0**.
+Feature source files are injected into consuming projects by build/Avae.DAL.targets.
 
----
+## Basic connection factory
 
-## Quick start (Sqlite)
+    using Avae.DAL;
+    using Microsoft.Data.Sqlite;
+    using Microsoft.Extensions.DependencyInjection;
 
-```csharp
-using Avae.DAL;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.DependencyInjection;
+    var services = new ServiceCollection();
 
-var services = new ServiceCollection();
+    services.UseFactory<SqliteConnection>("Data Source=app.db");
 
-services.UseFactory<SqliteConnection>("Data Source=app.db");
-services.UseLayer(
-    sp => new DBLayer(sp.GetRequiredService<IDBFactory>()),
-    getDBCreateCommand: () => """
-        CREATE TABLE IF NOT EXISTS Person (
-            Id INTEGER PRIMARY KEY AUTOINCREMENT,
-            FirstName TEXT,
-            LastName TEXT
-        );
-        """);
+    var provider = services.BuildServiceProvider();
+    var factory = provider.GetRequiredService<IDBFactory>();
 
-var provider = services.BuildServiceProvider();
-DBBase.Initialize(provider.GetRequiredService<IDBLayer>());
+    using var connection = factory.CreateConnection();
+    connection.Open();
 
-var layer = DBBase.Instance;
-var people = await layer.GetAllAsync<Person>();
-```
+## Entity mapper
 
-### Filtering
+    using Avae.DAL;
+    using Microsoft.Extensions.DependencyInjection;
 
-```csharp
-// AND
-var rows = await layer.WhereAsync<Person>(("FirstName", "Ada"), ("LastName", "Lovelace"));
+    services.AddSingleton<IEntityMapper>(
+        sp => new DommelEntityMapper(
+            sp.GetRequiredService<IDBFactory>()));
 
-// OR
-var any = await layer.FindByAnyAsync<Person>(("FirstName", "Ada"), ("FirstName", "Grace"));
-```
+    var provider = services.BuildServiceProvider();
+    var mapper = provider.GetRequiredService<IEntityMapper>();
 
-Column names in filters must match entity property / table column names. Values are parameterized; **column names are not** (see known issues).
+    using var connection = mapper.CreateConnection();
+    connection.Open();
 
-### Raw SQL / multi-map
+    var people = await mapper.SelectAsync<Person>(
+        connection,
+        person => person.FirstName == "Ada");
 
-```csharp
-var result = layer.Query<Contact, Person, Contact>(
-    """
-    SELECT C.Id AS ContactId, C.IdPerson, P.Id, P.FirstName, P.LastName
-    FROM Contact C
-    INNER JOIN Person P ON C.IdPerson = P.Id
-    WHERE C.Id = @Id
-    """,
-    (c, p) => { c.Person = p; return c; },
-    new { Id = id },
-    aliases: [new DBAlias("ContactId", "Id")]);
-```
-
----
+DommelEntityMapper also exposes synchronous/asynchronous first-item selection and paged queries.
 
 ## Architecture notes
 
-- **DBLayer** opens a connection per call via `IDBFactory.CreateConnection()`.
-- **Dapper.Contrib** is used for `Get` / `GetAll` (table name = type name by default).
-- **DBBase** is a process-wide singleton holder; prefer injecting `IDBLayer` in new code.
-- Optional real-time paths: SignalR hubs, MagicOnion record hubs, SQL table dependency.
-
----
+- DBFactory<TDbConnection> creates a new provider connection for each request.
+- DommelEntityMapper delegates entity selection to Dommel.
+- DBFactory also owns mutable monitor/session collections used by the optional real-time integrations.
+- MagicOnion exposes remote CRUD/query operations and raw SQL execution.
+- SignalR and MagicOnion streaming hubs can propagate database change notifications.
 
 ## Project layout
 
-```
-Implementations/     DBLayer, DBFactory, DBTransactional, logging wrappers
-Interfaces/          IDBLayer, IDBFactory, IDBMonitor, …
-Sqlite/              feature sources
-PostgreSQL/
-SqlDependency/
-SignalR/
-MagicOnion/ MagicOnionClient/ MagicOnionServer/
-MessagePack/         transactional formatters
-build/Avae.DAL.targets
-```
+    Avae.DAL.csproj
+    Extensions.cs
+    EntityValidator.cs
 
----
+    Implementations/      DB factory, logging connection/command, monitor, records
+    Interfaces/           DB factory, monitor, identity and entity-mapper contracts
+
+    Sqlite/               SQLite feature source
+    PostgreSQL/           PostgreSQL feature source
+    SqlDependency/        SQL table-dependency feature source
+    SignalR/              SignalR feature source
+    MagicOnion/           MagicOnion client-independent feature source
+    MagicOnionClient/     MagicOnion client feature source
+    MagicOnionServer/     MagicOnion server feature source
+    build/                MSBuild feature-selection targets
+
+## Development
+
+    dotnet restore
+    dotnet build
+    dotnet pack
+
+The repository currently has no dedicated test project. A local clone/build could not be completed during this audit because the execution environment could not resolve github.com; the findings below are therefore source-level findings.
+
+## Audit findings
+
+The following issues were identified during the maintainer review:
+
+1. [TLS certificate callback accepts any certificate](https://github.com/cedric56/Avae.DAL/issues/1)
+2. [SQLite commit hook replays old records and retains them indefinitely](https://github.com/cedric56/Avae.DAL/issues/2)
+3. [MagicOnion client uses a static disconnect delegate shared by all instances](https://github.com/cedric56/Avae.DAL/issues/3)
+4. [EntityHandler ignores commandTimeout for Dommel operations](https://github.com/cedric56/Avae.DAL/issues/4)
+5. [DBFactory Sessions and Monitors are unsynchronized mutable collections](https://github.com/cedric56/Avae.DAL/issues/5)
+6. [EntityHandler.Handlers is a global mutable static registry](https://github.com/cedric56/Avae.DAL/issues/6)
+7. [ConnectionTracker uses async void for notification dispatch](https://github.com/cedric56/Avae.DAL/issues/7)
+8. [MagicOnionLayer ignores buffered and transaction parameters on remote query APIs](https://github.com/cedric56/Avae.DAL/issues/8)
+9. [README documents APIs that are not present in the current repository tree](https://github.com/cedric56/Avae.DAL/issues/9)
 
 ## License
 
 See [LICENSE.txt](LICENSE.txt).
-
----
-
-## Known limitations
-
-See the companion notes in the repository issues / maintainer review: async connection disposal, ignored `aliases` / `commandTimeout` on some paths, filter SQL construction, and static `DBBase` / `Sessions` state.
