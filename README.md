@@ -1,3 +1,7 @@
+> [!CAUTION]
+> **`Avae.DAL` is not ready for production.**
+>
+
 # Avae.DAL
 
 Lightweight .NET data-access building blocks around **Dommel/Dapper**, with optional database and transport feature modules.
